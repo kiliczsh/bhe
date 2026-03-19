@@ -113,12 +113,7 @@
       </header>
 
       <main id="main-content">
-        <nav class="section-nav" role="tablist" aria-label="Bölümler">
-          <button class="section-tab is-active" role="tab" type="button" aria-selected="true" aria-controls="endeks">Endeks</button>
-          <button class="section-tab" role="tab" type="button" aria-selected="false" aria-controls="ozet-kartlar">Özet Kartlar</button>
-          <button class="section-tab" role="tab" type="button" aria-selected="false" aria-controls="karsilastirma">Karşılaştırma</button>
-        </nav>
-        <section class="panel chart-panel" id="endeks" role="tabpanel" tabindex="0">
+        <section class="panel chart-panel" id="endeks">
           <div class="panel-head">
             <div>
               <p class="panel-kicker">İNDEKS</p>
@@ -159,7 +154,7 @@
           </label>
         </section>
 
-        <section class="stats-grid" id="ozet-kartlar" role="tabpanel" tabindex="0" hidden>
+        <section class="stats-grid" id="ozet-kartlar">
           <article class="panel stat-card stat-card-inverse">
             <p class="panel-kicker">NOMİNAL</p>
             <strong id="money-value">₺500</strong>
@@ -183,12 +178,14 @@
           </article>
         </section>
 
-        <section class="panel compare-simple" id="karsilastirma" role="tabpanel" tabindex="0" hidden>
-          <p class="panel-kicker">KARŞILAŞTIRMA ÖZETİ</p>
-          <p class="compare-simple-lead">
-            <strong id="compare-leading-year">2026</strong>
-            <span id="compare-leading-copy">önde</span>
-          </p>
+        <section class="panel compare-simple" id="karsilastirma">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">KARŞILAŞTIRMA</p>
+              <h2 id="compare-leading-year">2026</h2>
+            </div>
+            <div class="panel-note" id="compare-leading-copy">önde</div>
+          </div>
           <p class="compare-simple-meta">
             <span id="compare-left-label">2026: ₺500</span>
             <span id="compare-right-label">2021: ₺150</span>

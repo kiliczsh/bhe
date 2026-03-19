@@ -52,6 +52,24 @@ function getCSSVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const popAnimations = new WeakMap();
+
+function pop(el) {
+  if (reducedMotion.matches) return;
+  const prev = popAnimations.get(el);
+  if (prev) prev.cancel();
+  const anim = el.animate(
+    [
+      { transform: "scale(0.86)", opacity: "0.5" },
+      { transform: "scale(1.05)", opacity: "1", offset: 0.55 },
+      { transform: "scale(1)", opacity: "1" }
+    ],
+    { duration: 300, easing: "cubic-bezier(0.25, 1, 0.5, 1)", fill: "both" }
+  );
+  popAnimations.set(el, anim);
+}
+
 const chart = document.querySelector("#chart");
 let hoverTooltip, hoverBg, hoverLabel, hoverPoint;
 const yearRange = document.querySelector("#year-range");
@@ -214,11 +232,16 @@ function updateStats() {
   const latest = data[data.length - 1];
 
   selectedYearPill.textContent = `${selected.year}`;
+  pop(selectedYearPill);
   chartSummary.textContent = metricConfig[state.metric].label;
   moneyValue.textContent = formatTRY(selected.pocketMoney);
+  pop(moneyValue);
   realValue.textContent = formatTRY(selected.currentValue);
+  pop(realValue);
   treatValue.textContent = formatBigMac(selected.treatCount);
+  pop(treatValue);
   vibeValue.textContent = `${selected.vibe}`;
+  pop(vibeValue);
   heroAmount.textContent = `${latest.pocketMoney}`;
 }
 
@@ -338,28 +361,6 @@ function updateShareLink() {
   const text = `Bu yılki bayram harçlığı ${formatTRY(selected.pocketMoney)}!\nhttps://bayramharcligi.com\n\nBu amme hizmeti için teşekkürler @doguabaris!`;
   shareBtn.href = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }
-
-const sectionNav = document.querySelector(".section-nav");
-const sectionTabs = sectionNav.querySelectorAll("[role='tab']");
-const sectionPanels = document.querySelectorAll("#main-content [role='tabpanel']");
-
-sectionNav.addEventListener("click", (event) => {
-  const tab = event.target.closest("[role='tab']");
-  if (!tab) return;
-
-  sectionTabs.forEach((t) => {
-    t.classList.remove("is-active");
-    t.setAttribute("aria-selected", "false");
-  });
-
-  sectionPanels.forEach((panel) => {
-    panel.hidden = true;
-  });
-
-  tab.classList.add("is-active");
-  tab.setAttribute("aria-selected", "true");
-  document.getElementById(tab.getAttribute("aria-controls")).hidden = false;
-});
 
 yearRange.max = `${data.length - 1}`;
 yearRange.value = `${state.selectedIndex}`;

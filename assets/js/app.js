@@ -48,7 +48,12 @@ const state = {
   metric: "pocketMoney"
 };
 
+function getCSSVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 const chart = document.querySelector("#chart");
+let hoverTooltip, hoverBg, hoverLabel, hoverPoint;
 const yearRange = document.querySelector("#year-range");
 const compareYear = document.querySelector("#compare-year");
 const metricTabs = document.querySelector("#metric-tabs");
@@ -97,7 +102,9 @@ function buildCompareSelect() {
 
 function syncMetricTabs() {
   metricTabs.querySelectorAll("[data-metric]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.metric === state.metric);
+    const isActive = button.dataset.metric === state.metric;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 }
 
@@ -107,6 +114,9 @@ function buildChart() {
   const padding = { top: 42, right: 80, bottom: 48, left: 62 };
   const innerWidth = width - padding.left - padding.right;
   const innerHeight = height - padding.top - padding.bottom;
+  const colorBg = getCSSVar("--bg");
+  const colorBlack = getCSSVar("--black");
+  const colorPage = getCSSVar("--page");
   const config = metricConfig[state.metric];
   const values = data.map((item) => getMetricValue(item, state.metric));
   const maxValue = Math.max(...values);
@@ -174,24 +184,29 @@ function buildChart() {
     <path class="chart-line" d="${linePath}"></path>
     ${points}
     <g>
-      <rect x="${xFor(state.selectedIndex) - ((`${selected.year} / ${config.format(selectedValue)}`).length * 8 + 20) / 2}" y="${selectedLabelY - 16}" width="${(`${selected.year} / ${config.format(selectedValue)}`).length * 8 + 20}" height="24" rx="4" fill="#e30917" />
-      <text x="${xFor(state.selectedIndex)}" y="${selectedLabelY}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">
+      <rect x="${xFor(state.selectedIndex) - ((`${selected.year} / ${config.format(selectedValue)}`).length * 8 + 20) / 2}" y="${selectedLabelY - 16}" width="${(`${selected.year} / ${config.format(selectedValue)}`).length * 8 + 20}" height="24" rx="4" fill="${colorBg}" />
+      <text x="${xFor(state.selectedIndex)}" y="${selectedLabelY}" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">
         ${selected.year} / ${config.format(selectedValue)}
       </text>
     </g>
     <g>
-      <rect x="${xFor(state.compareIndex) - ((`${compare.year} / ${config.format(compareValue)}`).length * 8 + 20) / 2}" y="${compareLabelY - 16}" width="${(`${compare.year} / ${config.format(compareValue)}`).length * 8 + 20}" height="24" rx="4" fill="#111" />
-      <text x="${xFor(state.compareIndex)}" y="${compareLabelY}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">
+      <rect x="${xFor(state.compareIndex) - ((`${compare.year} / ${config.format(compareValue)}`).length * 8 + 20) / 2}" y="${compareLabelY - 16}" width="${(`${compare.year} / ${config.format(compareValue)}`).length * 8 + 20}" height="24" rx="4" fill="${colorBlack}" />
+      <text x="${xFor(state.compareIndex)}" y="${compareLabelY}" text-anchor="middle" fill="${colorPage}" font-size="13" font-weight="700">
         ${compare.year} / ${config.format(compareValue)}
       </text>
     </g>
     <g id="hover-tooltip" visibility="hidden">
-      <rect id="hover-bg" x="0" y="0" width="0" height="28" rx="4" fill="#111" />
-      <text id="hover-label" x="0" y="0" text-anchor="middle" fill="#fff" font-size="13" font-weight="700"></text>
+      <rect id="hover-bg" x="0" y="0" width="0" height="28" rx="4" fill="${colorBlack}" />
+      <text id="hover-label" x="0" y="0" text-anchor="middle" fill="${colorPage}" font-size="13" font-weight="700"></text>
     </g>
     <circle class="chart-hover-point" id="hover-point" cx="0" cy="0" r="6" visibility="hidden"></circle>
     ${yearMarkers}
   `;
+
+  hoverTooltip = chart.querySelector("#hover-tooltip");
+  hoverBg = chart.querySelector("#hover-bg");
+  hoverLabel = chart.querySelector("#hover-label");
+  hoverPoint = chart.querySelector("#hover-point");
 }
 
 function updateStats() {
@@ -233,7 +248,10 @@ function updateCompare() {
 }
 
 function render() {
+  const selectedYear = data[state.selectedIndex].year;
   yearRange.value = `${state.selectedIndex}`;
+  yearRange.setAttribute("aria-valuenow", selectedYear);
+  yearRange.setAttribute("aria-valuetext", `${selectedYear}`);
   compareYear.value = `${state.compareIndex}`;
   syncMetricTabs();
   buildChart();
@@ -272,13 +290,9 @@ chart.addEventListener("mouseover", (event) => {
   const item = data[i];
   const config = metricConfig[state.metric];
   const value = getMetricValue(item, state.metric);
-  const tooltip = chart.querySelector("#hover-tooltip");
-  const bg = chart.querySelector("#hover-bg");
-  const label = chart.querySelector("#hover-label");
-  const point = chart.querySelector("#hover-point");
 
   const text = `${item.year} / ${config.format(value)}`;
-  label.textContent = text;
+  hoverLabel.textContent = text;
 
   const textLen = text.length * 8 + 20;
 
@@ -286,27 +300,25 @@ chart.addEventListener("mouseover", (event) => {
   const cx = Number(hitCircle.getAttribute("cx"));
   const cy = Number(hitCircle.getAttribute("cy"));
 
-  label.setAttribute("x", cx);
-  label.setAttribute("y", cy - 22);
-  bg.setAttribute("x", cx - textLen / 2);
-  bg.setAttribute("y", cy - 38);
-  bg.setAttribute("width", textLen);
+  hoverLabel.setAttribute("x", cx);
+  hoverLabel.setAttribute("y", cy - 22);
+  hoverBg.setAttribute("x", cx - textLen / 2);
+  hoverBg.setAttribute("y", cy - 38);
+  hoverBg.setAttribute("width", textLen);
 
-  point.setAttribute("cx", cx);
-  point.setAttribute("cy", cy);
+  hoverPoint.setAttribute("cx", cx);
+  hoverPoint.setAttribute("cy", cy);
 
-  tooltip.setAttribute("visibility", "visible");
-  point.setAttribute("visibility", "visible");
+  hoverTooltip.setAttribute("visibility", "visible");
+  hoverPoint.setAttribute("visibility", "visible");
 });
 
 chart.addEventListener("mouseout", (event) => {
   const index = event.target.dataset.index;
   if (index === undefined) return;
 
-  const tooltip = chart.querySelector("#hover-tooltip");
-  const point = chart.querySelector("#hover-point");
-  tooltip.setAttribute("visibility", "hidden");
-  point.setAttribute("visibility", "hidden");
+  hoverTooltip.setAttribute("visibility", "hidden");
+  hoverPoint.setAttribute("visibility", "hidden");
 });
 
 yearRange.addEventListener("input", () => {
@@ -326,6 +338,28 @@ function updateShareLink() {
   const text = `Bu yılki bayram harçlığı ${formatTRY(selected.pocketMoney)}!\nhttps://bayramharcligi.com\n\nBu amme hizmeti için teşekkürler @doguabaris!`;
   shareBtn.href = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }
+
+const sectionNav = document.querySelector(".section-nav");
+const sectionTabs = sectionNav.querySelectorAll("[role='tab']");
+const sectionPanels = document.querySelectorAll("#main-content [role='tabpanel']");
+
+sectionNav.addEventListener("click", (event) => {
+  const tab = event.target.closest("[role='tab']");
+  if (!tab) return;
+
+  sectionTabs.forEach((t) => {
+    t.classList.remove("is-active");
+    t.setAttribute("aria-selected", "false");
+  });
+
+  sectionPanels.forEach((panel) => {
+    panel.hidden = true;
+  });
+
+  tab.classList.add("is-active");
+  tab.setAttribute("aria-selected", "true");
+  document.getElementById(tab.getAttribute("aria-controls")).hidden = false;
+});
 
 yearRange.max = `${data.length - 1}`;
 yearRange.value = `${state.selectedIndex}`;

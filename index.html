@@ -40,6 +40,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/favicon/apple-touch-icon.png" />
     <link rel="manifest" href="./assets/favicon/site.webmanifest" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1c1a18" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -108,16 +109,16 @@
               </div>
             </div>
           </div>
-          <nav class="section-nav" aria-label="Sayfa içi gezinme">
-            <a href="#endeks">Endeks</a>
-            <a href="#ozet-kartlar">Özet Kartlar</a>
-            <a href="#karsilastirma">Karşılaştırma</a>
-          </nav>
         </section>
       </header>
 
       <main id="main-content">
-        <section class="panel chart-panel" id="endeks">
+        <nav class="section-nav" role="tablist" aria-label="Bölümler">
+          <button class="section-tab is-active" role="tab" type="button" aria-selected="true" aria-controls="endeks">Endeks</button>
+          <button class="section-tab" role="tab" type="button" aria-selected="false" aria-controls="ozet-kartlar">Özet Kartlar</button>
+          <button class="section-tab" role="tab" type="button" aria-selected="false" aria-controls="karsilastirma">Karşılaştırma</button>
+        </nav>
+        <section class="panel chart-panel" id="endeks" role="tabpanel" tabindex="0">
           <div class="panel-head">
             <div>
               <p class="panel-kicker">İNDEKS</p>
@@ -127,14 +128,14 @@
           </div>
 
           <div class="chart-controls">
-            <div class="metric-tabs" id="metric-tabs" aria-label="Grafik metriği">
-              <button class="metric-tab is-active" data-metric="pocketMoney" type="button">
+            <div class="metric-tabs" role="group" id="metric-tabs" aria-label="Grafik metriği">
+              <button class="metric-tab is-active" data-metric="pocketMoney" type="button" aria-pressed="true">
                 ₺
               </button>
-              <button class="metric-tab" data-metric="currentValue" type="button">
+              <button class="metric-tab" data-metric="currentValue" type="button" aria-pressed="false">
                 2026
               </button>
-              <button class="metric-tab" data-metric="treatCount" type="button">
+              <button class="metric-tab" data-metric="treatCount" type="button" aria-pressed="false">
                 BIG MAC ALIM GÜCÜ
               </button>
             </div>
@@ -153,12 +154,12 @@
 
           <label class="slider-wrap" for="year-range">
             <div class="range-shell">
-              <input id="year-range" type="range" min="0" max="21" step="1" value="21" aria-label="Yıl seçici" />
+              <input id="year-range" type="range" min="0" max="21" step="1" value="21" aria-label="Yıl seçici" aria-valuemin="2005" aria-valuemax="2026" aria-valuenow="2026" aria-valuetext="2026" />
             </div>
           </label>
         </section>
 
-        <section class="stats-grid" id="ozet-kartlar">
+        <section class="stats-grid" id="ozet-kartlar" role="tabpanel" tabindex="0" hidden>
           <article class="panel stat-card stat-card-inverse">
             <p class="panel-kicker">NOMİNAL</p>
             <strong id="money-value">₺500</strong>
@@ -182,7 +183,7 @@
           </article>
         </section>
 
-        <section class="panel compare-simple" id="karsilastirma">
+        <section class="panel compare-simple" id="karsilastirma" role="tabpanel" tabindex="0" hidden>
           <p class="panel-kicker">KARŞILAŞTIRMA ÖZETİ</p>
           <p class="compare-simple-lead">
             <strong id="compare-leading-year">2026</strong>
